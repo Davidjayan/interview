@@ -1,14 +1,23 @@
 const express = require('express');
 const app = express();
-
+app.use(express.json());
 const db = require('./models');
 
 const User = db.User;   
 
-app.get('/insert',(req,res)=>{
+const cors = require('cors');
+app.use(cors({
+    origin: 'http://localhost:3001'
+}));
+
+
+app.post('/check',(req,res)=>{
+    res.send("David"+req.body.id)
+})
+app.post('/insert',(req,res)=>{
     User.create({
-        Name:"Jayan",
-        Mobile:"9952524268"
+        Name:req.body.name,
+        Mobile:req.body.mobile
     }).then((data)=>{
         res.send(data);
     }).catch((err)=>{
@@ -30,24 +39,26 @@ app.get('/listall',(req,res)=>{
 
 
 
-app.get('/update',(req,res)=>{
-    User.update({Mobile:"9551196822"},{where:{id:3}}).then((data)=>{
-        data==1?res.send("Update Successfull"):res.send("Unsuccessfull")
+app.post('/update',(req,res)=>{
+    User.update({Mobile:req.body.Mobile,Name:req.body.Name},{where:{id:req.body.id}}).then((data)=>{
+        data==1?res.send({"message":"Update Successfull"}):res.send({"message":"Unsuccessfull"})
     }).catch((err)=>{         
                 console.log(err);    
         })
 })
 
-app.get('/delete',(req,res)=>{
-    User.destroy({where:{id:10}}).then((data)=>{
-        data==1?res.send('Successfully deleted'):res.send('Unsuccessfull')
+app.post('/delete',(req,res)=>{
+    User.destroy({where:{id:req.body.id}}).then((data)=>{
+        data==1?res.send({"message":"Successfully Deleted"}):res.send({"message":"Unsuccessfull"})
     })
 })
 
 
 
 db.sequelize.sync().then((req)=>{
-    app.listen(3000,()=>{
+    let port = process.env.PORT || 3000;
+
+    app.listen(port,()=>{
         console.log("Server...");
     })
 })
